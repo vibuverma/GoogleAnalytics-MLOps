@@ -18,7 +18,7 @@ file= [
     "dvc.yaml",
     "params.yaml",
     ".gitignore",
-    os.path.join("src","__init__"),
+    os.path.join("src","__init__.py"),
     "README.md"
 ]
 
