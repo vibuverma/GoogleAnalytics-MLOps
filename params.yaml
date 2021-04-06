@@ -7,20 +7,19 @@ data_source:
   test_source: data_given/test.csv
 
 load_data:
-  raw_dataset_csv: data/raw/train.csv
+  raw_train_data_csv: data/raw/train.csv
+  raw_test_data_csv: data/raw/test.csv
 
 split_data:
-  train_path: data/proecessed/train_train.csv
-  test_path: data/proecessed/test_train.csv
-  test_size: 0.2
+  train_path: data/proecessed/train_processed.csv
+  test_path: data/proecessed/test_processed.csv
+
 
 estimators:
-  ElasticNet:
-    params:
-      alpha: 0.88
-      l1_ratio: 0.89
-#      alpha: 0.9
-#      l1_ratio: 0.4
+  XGBoost:
+      n_estimators: 1000
+      learning_rate: 0.5
+      max_depth: 8
 
 model_dir: saved_models
 
