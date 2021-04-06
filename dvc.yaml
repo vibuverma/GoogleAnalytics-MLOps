@@ -2,36 +2,35 @@ stages:
   load_data:
     cmd: python src/load_data.py --config=params.yaml
     deps:
-      - src/get_data.py
-      - src/load_data.py
-      - data_given/winequality.csv
+    - src/get_data.py
+    - src/load_data.py
+    - data_given/train_data.csv
+    - data_given/test_data.csv
     outs:
-      - data/raw/winequality.csv
+    - data/raw/train.csv
+    - data/raw/test.csv
 
-  split_data:
-    cmd: python src/split_data.py --config=params.yaml
+  preprocess_and_split:
+    cmd: python src/preprocess.py --config=params.yaml
     deps:
-      - src/split_data.py
-      - data/raw/winequality.csv
+    - src/preprocess_and_split.py
+    - prediction_service/preprocess_prediction.py
+    - data/raw/train.csv
+    - data/raw/test.csv
     outs:
-      - data/proecessed/train_winequality.csv
-      - data/proecessed/test_winequality.csv
+    - data/processed/train_processed.csv
+    - data/processed/test_processed.csv
+
   train_and_evaluate:
     cmd: python src/train_and_evaluate.py --config=params.yaml
     deps:
-      - data/proecessed/train_winequality.csv
-      - data/proecessed/test_winequality.csv
-      - src/train_and_evaluate.py
+    - data/processed/train_processed.csv
+    - data/processed/test_df.csv
+    - src/train_and_evaluate.py
     params:
-      - estimators.ElasticNet.params.alpha
-      - estimators.ElasticNet.params.l1_ratio
-#    metrics:
-#      - report/scores.json:
-#          cache: false
-#      - report/params.json:
-#          cache: false
-#    outs:
-#      - saved_models/model.joblib
+    - estimators.XGBoost.n_estimators
+    - estimators.XGBoost.learning_rate
+    - estimators.XGBoost.max_depth
   log_production_model:
     cmd: python src/log_production_model.py --config=params.yaml
     deps:

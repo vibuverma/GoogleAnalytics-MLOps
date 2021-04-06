@@ -1,17 +1,17 @@
 base:
-  project: winequlatiy-project
-  random_state: 40
+  project: GA-MLOps
   target_col: TARGET
 
 data_source:
-  s3_source: data_given/winequality.csv
+  train_source: data_given/train.csv
+  test_source: data_given/test.csv
 
 load_data:
-  raw_dataset_csv: data/raw/winequality.csv
+  raw_dataset_csv: data/raw/train.csv
 
 split_data:
-  train_path: data/proecessed/train_winequality.csv
-  test_path: data/proecessed/test_winequality.csv
+  train_path: data/proecessed/train_train.csv
+  test_path: data/proecessed/test_train.csv
   test_size: 0.2
 
 estimators:
@@ -32,7 +32,7 @@ webapp_model_dir: prediction_service/model/model.joblib
 
 mlflow_config:
   artifacts_dir: artifacts
-  experiment_name: ElasticNet Regression
+  experiment_name: XG-Boost Regression
   run_name: mlops
-  registered_model_name: ElasticNetWineModel
+  registered_model_name: XGBoostModel
   remote_server_uri: http://127.0.0.1:5000/
