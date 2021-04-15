@@ -5,6 +5,7 @@ import pickle
 import pandas as pd
 import datetime
 import os
+from prediction_service import prediction
 from sklearn.preprocessing import LabelEncoder
 
 webapp_dir = "webapp"
@@ -44,6 +45,27 @@ trafficSource_source_pkl = pickle.load(open('webapp/Column Pickle/trafficSource_
 @cross_origin()
 def home():
     return render_template("home.html")
+
+
+@app.route("/batch", methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+
+        try:
+
+            path = request.files['file']
+            path = path.filename
+            response = prediction.form_response(path)
+            result = "The Top Ten Predictions are "
+            return render_template("index1.html", response=[response], result=result)
+
+
+        except Exception as e:
+            error = {"error": e}
+            return render_template("404.html", error=error)
+
+    else:
+        return render_template('index1.html')
 
 
 @app.route("/predict", methods=["POST"])
