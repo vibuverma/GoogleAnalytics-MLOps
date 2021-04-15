@@ -1,0 +1,9 @@
+sklearn
+pyyaml
+requests
+xgboost
+lightgbm
+pandas
+flask_cors
+flask
+gunicorn
