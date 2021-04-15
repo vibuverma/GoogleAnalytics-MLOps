@@ -1,0 +1,17 @@
+body{
+    background-image: linear-gradient(#eafaff, #fff, #eafaff);
+
+    text-align: center;
+}
+
+.navbar {
+    background-color: #ac1515;
+}
+
+a {
+    color: #1b7e7e;
+}
+
+a:hover {
+    color: #43b2b9;
+  }
