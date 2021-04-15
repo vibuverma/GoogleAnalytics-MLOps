@@ -1,13 +1,12 @@
 import yaml
 import pandas as pd
 import re
-import argparse
+#import argparse
 import json
 import numpy as np
 from pandas import json_normalize
 from datetime import datetime
-import logging
-
+from prediction_service.application_logging.logger import App_Logger
 
 
 def read_params(config_path):
@@ -91,57 +90,58 @@ def label_encoding(df,label_cols):
 
 def preprocess_and_split(config_path):
     file_object = open('Prediction_log.txt','a+')
-    logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+    logger = App_Logger()
     config = read_params(config_path)
     test_data_path = config["split_data"]["test_path"]
     raw_test_data_path=config["load_data"]["raw_test_data_csv"]
-    logging.info("Test Dataset loaded  successfully")
+    logger.log(file_object, "Test Dataset loaded  successfully")
 
     test_df = pd.read_csv(raw_test_data_path,nrows=10000)
-    logging.info("Data reading successful")
+    logger.log(file_object,"Data reading successful")
 
 
 # 1.Function for extracting features from date column
     test_df = date_process(test_df)  # function  for datetime cols processing in test data
-    logging.info("Datetime Processing in test data completed")
+    logger.log(file_object, "Datetime Processing in test data completed ")
 
 
 # 2. Function to validate the columns in the dataset for json datatype
     test_json_columns = column_validator(test_df) # validating the columns in the test dataset for json datatype
-    logging.info("Column_validator successful")
+    logger.log(file_object, "Column_validator successful")
 # 2.1 Function for flattening the json columns and merge them with original dataset
     if test_json_columns is not None:
           test_df = json_to_df(test_df, test_json_columns) #Normalizing the json columns in test data
-          logging.info("Normalizing the json columns completed")
+          features = test_df[['browser','operatingSystem','country','deviceCategory','pageviews']]  # storing features to show on ui screen
+          logger.log(file_object, "Normalizing the json columns completed")
 # 3.Dropping columns which have more than 50% of null values and not contributing to the target variable
     test_df = remove_nan_cols(test_df)
-    logging.info("50% NAN value columns are removed")
+    logger.log(file_object, "50% NAN value columns are removed")
 
     test_df.drop('sessionId', axis=1,inplace=True)  # Removing this column as  it is the  combination of fullVisitorId and visitId
     test_df.drop('visitStartTime', axis=1, inplace=True) # Removing this column as it is extracted into visitHour
     test_df.drop('fullVisitorId', axis=1,inplace=True)  # This column is very long and of no much contribution towards target variable
     drop_columns=['date','visitId','weekday','day','bounces','keyword']
     test_df.drop(drop_columns, axis=1, inplace=True)
-    logging.info("Dropped columns which are not contributing to the transaction revenue")
+    logger.log(file_object,'Dropped columns which are not contributing to the transaction revenue')
 
 # 4.Imputation of null values
     test_df = impute_na(test_df)
-    logging.info("Imputing NAN values with 0 is completed")
+    logger.log(file_object, "Imputing NAN values with 0 is completed")
 
 # 5.Changing datatypes from object to desired ones
     test_df = data_type_convert(test_df)
-    logging.info("Conversion of Datatype to int completed")
+    logger.log(file_object, "Conversion of Datatype to int completed")
 
 # 6. Removing columns with constant values or with zero standard deviation
     test_df = remove_zero_std_cols(test_df)
-    logging.info("Zero standard deviation columns are removed")
+
+    logger.log(file_object, "Zero standard deviation columns are removed")
 
 # 7 Function to gather categorical columns in the dataset and performing label encoding
     label_cols = categorical_cols(test_df)
-    logging.info("Gathering of categorical columns in test data completed")
-
+    logger.log(file_object, "Gathering of categorical columns in test data completed ")
     test_df=label_encoding(test_df,label_cols)
-    logging.info("Label_encoding in test data completed ")
+    logger.log(file_object, "Label_encoding in test data completed ")
 
 # 8. Imputing pageviews column with KNNImputer in train data
 
@@ -149,19 +149,27 @@ def preprocess_and_split(config_path):
     imputer = KNNImputer()
     imputer_test_df = imputer.fit_transform(test_df[['pageviews']])  ## imputing pageviews with KNNimputer in test data
     test_df['pageviews'] = imputer_test_df
-    logging.info("Pageviews column imputed with KNNimputer")
+    logger.log(file_object, "Pageviews column imputed with KNNimputer")
 
     test_df.to_csv(test_data_path, sep=",", index=False, encoding="utf-8") ## storing Processed test data
-    logging.info("Preprocessing of prediction file completed")
+    logger.log(file_object, "Preprocessing of prediction file completed")
     file_object.close()
+    return features
 
 
-class preprocessor:
-    def __init__(self,path):
-        self.path = path
-        args = argparse.ArgumentParser()
-        args.add_argument("--config", default="params.yaml")
-        parsed_args = args.parse_args()
-        if self.path == 'test_data.csv':
-            preprocess_and_split(config_path=parsed_args.config)
+# class preprocessor:
+#      def __init__(self,path):
+#         self.path = path
+#         args = argparse.ArgumentParser()
+#         args.add_argument("--config", default="params.yaml")
+#         parsed_args = args.parse_args()
+#         if self.path == 'test_data.csv':
+#             preprocess_and_split(config_path=parsed_args.config)
 
+def preprocessor(path):
+    # args = argparse.ArgumentParser()
+    # args.add_argument("--config", default="params.yaml")
+    # parsed_args = args.parse_args()
+    if path == 'test_data.csv':
+        features=preprocess_and_split(config_path="params.yaml")
+    return features

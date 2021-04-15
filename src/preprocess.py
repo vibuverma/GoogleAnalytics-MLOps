@@ -4,7 +4,8 @@ import argparse
 import pandas as pd
 import re
 import json
-import logging
+from Application_Logging.logger import App_Logger
+
 import numpy as np
 from pandas import json_normalize
 from datetime import datetime
@@ -86,66 +87,65 @@ def label_encoding(df,label_cols):
 
 def preprocess_and_split(config_path):
     file_object = open('Training_log.txt','a+')
-
-    logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
-
+    logger = App_Logger()
     config = read_params(config_path)
 
     train_data_path = config["split_data"]["train_path"]
     raw_train_data_path = config["load_data"]["raw_train_data_csv"]
-    logging.info("Training Data load was successful")
+    logger.log(file_object,"Training Data load was successful")
 
     train_df = pd.read_csv(raw_train_data_path)
-    logging.info("Data reading successful")
+    logger.log(file_object,"Data reading successful")
+
 # 1.Function for extracting features from date column
     train_df = date_process(train_df)  # function  for datetime cols processing in train data
-    logging.info("Datetime Processing in train data completed")
+    logger.log(file_object, "Datetime Processing in train data completed ")
 
 # 2. Function to validate the columns in the dataset for json datatype
     train_json_columns = column_validator(train_df) # Validating the columns in the train dataset for json datatype
-    logging.info("Column_validator successful")
+    logger.log(file_object,"Column_validator successful" )
+
 # 2.1 Function for flattening the json columns and merge them with original dataset
     if train_json_columns is not None:
         train_df = json_to_df(train_df,train_json_columns) #Normalizing the json columns in train data
         target=train_df['transactionRevenue']
-        logging.info("Normalizing the json columns completed")
+        logger.log(file_object,"Normalizing the json columns completed")
 
 # 3.Dropping columns which have more than 50% of null values and columns not contributing to the target variable
     train_df= remove_nan_cols(train_df)
-    logging.info("50% NAN value columns are removed")
+    logger.log(file_object,"50% NAN value columns are removed")
     train_df.drop('sessionId', axis=1,inplace=True)  # Removing this column as  it is the  combination of fullVisitorId and visitId
     train_df.drop('visitStartTime', axis=1, inplace=True)  # Removing this column as it is extracted into visitHour
     train_df.drop('fullVisitorId', axis=1,inplace=True)  # This column is very long and of no much contribution towards target variable
     #drop_columns = ['visitId', 'weekday', 'day', 'bounces', 'keyword']
     drop_columns = ['visitId', 'weekday', 'day']
     train_df.drop(drop_columns, axis=1, inplace=True)
-    logging.info("Dropped columns which are not contributing to the transaction revenue")
+    logger.log(file_object, 'Dropped columns which are not contributing to the transaction revenue')
 
 
 
 # 4.Imputation of null values
     train_df = pd.concat([train_df, target], axis=1) # transactionRevenue col is attached to the dataframe for imputing nan with 0
     train_df = impute_na(train_df)
-    logging.info("Imputing NAN values with 0 is completed")
+    logger.log(file_object, "Imputing NAN values with 0 is completed")
 
 
 # 5.Changing datatypes from object to desired ones
     train_df = data_type_convert(train_df)
-    logging.info("Conversion of Datatype to int completed")
+    logger.log(file_object, "Conversion of Datatype to int completed")
 
 
 # 6. Removing columns with constant values or with zero standard deviation
     train_df = remove_zero_std_cols(train_df)
-    logging.info("Zero standard deviation columns are removed")
-
+    logger.log(file_object, "Zero standard deviation columns are removed")
 
 
 # 7 Function to gather categorical columns in the dataset and performing label encoding
     label_cols = categorical_cols(train_df)
-    logging.info("Gathering of label _cols in train data completed ")
+    logger.log(file_object, "Gathering of label _cols in train data completed ")
 
     train_df=label_encoding(train_df,label_cols)
-    logging.info("Label_encoding in train data completed")
+    logger.log(file_object, "Label_encoding in train data completed ")
 
 # 8. Imputing pageviews column with KNNImputer in train data
 
@@ -156,11 +156,10 @@ def preprocess_and_split(config_path):
     train_df['pageviews'] = imputer_train_df
 
 
-    logging.info("Pageviews column imputed with KNNimputer")
+    logger.log(file_object, "Pageviews column imputed with KNNimputer")
     train_df.to_csv(train_data_path, sep=",", index=False, encoding="utf-8")## Storing Processed train data
-    logging.info("Training data is processed and stored as data/processed/train_processed.csv")
+    logger.log(file_object,"Training data is processed and stored as data/processed/train_processed.csv")
     file_object.close()
-
 
 
 # Program Entry point#

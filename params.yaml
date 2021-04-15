@@ -27,7 +27,8 @@ reports:
   params: report/params.json
   scores: report/scores.json
 
-webapp_model_dir: prediction_service/model/model.joblib
+webapp_model_dir: prediction_service/model/xgb_model.pkl
+webapp_model_dir_1: prediction_service/model/xgboost_model.pkl
 
 mlflow_config:
   artifacts_dir: artifacts

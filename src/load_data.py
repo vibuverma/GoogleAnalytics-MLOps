@@ -2,15 +2,12 @@
 # save it in the data/raw for further process
 from get_data import read_params,get_data
 import argparse
-import logging
 
 def load_and_save(config_path):
     config=read_params(config_path)
     train_df,test_df=get_data(config_path)
     raw_train_data_path=config["load_data"]["raw_train_data_csv"]
-    logging.info("train.csv file added to raw files.")
     raw_test_data_path=config["load_data"]["raw_test_data_csv"]
-    logging.info("test.csv file added to raw files.")
     train_df.to_csv(raw_train_data_path, index=False)
     test_df.to_csv(raw_test_data_path,index=False)
 
