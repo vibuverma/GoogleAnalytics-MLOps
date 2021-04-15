@@ -11,6 +11,7 @@ from get_data import read_params
 import argparse
 import pickle
 import logging
+pd.set_option('display.max_columns', None)
 
 def eval_metrics(actual, pred):
     rmse = np.sqrt(mean_squared_error(actual, pred))
@@ -50,9 +51,12 @@ def train_and_evaluate(config_path):
     y_train = pd.DataFrame(y_train)
     val_y = pd.DataFrame(val_y)
 
+
+
     xgb_model=run_xgb(x1,y_train)
     prediction = xgb_model.predict(val_x1)
     (rmse,mae,r2)=eval_metrics(val_y,prediction)
+
     print("  RMSE: %s" % rmse)
     print("  MAE: %s" % mae)
     print("  R2: %s" % r2)
@@ -65,6 +69,8 @@ def train_and_evaluate(config_path):
    ##############################
     logging.info("Model file created successfully")
     file_object.close()
+
+
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()

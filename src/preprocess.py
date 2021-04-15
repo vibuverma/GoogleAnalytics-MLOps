@@ -139,6 +139,7 @@ def preprocess_and_split(config_path):
     logging.info("Zero standard deviation columns are removed")
 
 
+
 # 7 Function to gather categorical columns in the dataset and performing label encoding
     label_cols = categorical_cols(train_df)
     logging.info("Gathering of label _cols in train data completed ")
@@ -159,6 +160,7 @@ def preprocess_and_split(config_path):
     train_df.to_csv(train_data_path, sep=",", index=False, encoding="utf-8")## Storing Processed train data
     logging.info("Training data is processed and stored as data/processed/train_processed.csv")
     file_object.close()
+
 
 
 # Program Entry point#
