@@ -75,7 +75,7 @@ def predict():
     date = request.form["Date"]
     month = pd.to_datetime(date, format="%Y-%m-%dT%H:%M").month
     year = pd.to_datetime(date, format="%Y-%m-%dT%H:%M").year
-    weekday = 1 #pd.to_datetime(date, format="%Y-%m-%dT%H:%M").weekday
+    weekday = pd.to_datetime(date, format="%Y-%m-%dT%H:%M").weekday
 
 
     visitHour = int(pd.to_datetime(date, format='%Y-%m-%dT%H:%M').hour)
