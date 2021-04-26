@@ -75,7 +75,10 @@ def predict():
     date = request.form["Date"]
     month = pd.to_datetime(date, format="%Y-%m-%dT%H:%M").month
     year = pd.to_datetime(date, format="%Y-%m-%dT%H:%M").year
-    weekday = pd.to_datetime(date, format="%Y-%m-%dT%H:%M").weekday
+    #weekday = 1#pd.to_datetime(date, format="%Y-%m-%dT%H:%M").weekday
+
+    a = datetime.datetime.strptime(date,"%Y-%m-%dT%H:%M")
+    weekday= a.weekday()
 
 
     visitHour = int(pd.to_datetime(date, format='%Y-%m-%dT%H:%M').hour)
@@ -90,7 +93,7 @@ def predict():
     totals_pageviews = int(request.form["pageviews"])
 
     # Extracting totals.newVisits
-    totals_newVisits = 1#request.form["newVisits"]
+    totals_newVisits = int(request.form["newVisits"])
 
     # Extracting channelGrouping
     channelGrouping = str(request.form['channelGrouping'])
